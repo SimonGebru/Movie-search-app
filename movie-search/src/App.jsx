@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import SearchMovies from "./SearchMovies";
+import DisplayMovies from "./DisplayMovies";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [movies, setMovies] = useState([]); 
+  const [error, setError] = useState("");
+
+  const searchMovies = async (query) => {
+    try {
+      const response = await fetch(`http://www.omdbapi.com/?apikey=37fe945a&s=${query}`);
+      const data = await response.json();
+      if (data.Response === "True") {
+        setMovies(data.Search);
+        setError("");
+      } else {
+        setMovies([]);
+        setError("Inga filmer hittades. Försök med ett annat sökord.");
+      }
+    } catch (error) {
+      setError("Ett fel inträffade vid hämtning av data.");
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="app">
+      <h1>Movie Search App</h1>
+      <SearchMovies onSearch={searchMovies} />
+      {error && <p className="error">{error}</p>}
+      <DisplayMovies movies={movies} />
+    </div>
+  );
 }
 
-export default App
+export default App;
